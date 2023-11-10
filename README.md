@@ -1,2 +1,2 @@
-# r-ose
-Reusable Open Stratospheric Explorer 
+# R-OSE
+Reusable Open Stratospheric Explorer
