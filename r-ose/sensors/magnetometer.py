@@ -55,7 +55,7 @@ class Magnetometer:
                 
                 return value
 
-        def getData(self):
+        def _getData(self):
                 # Read Accelerometer raw value
                 x = self.x_axis
                 y = self.y_axis
@@ -76,6 +76,10 @@ class Magnetometer:
 
                 return heading_angle
 
+        @property
+        def heading(self):
+                return self._getData()
+
 if __name__=="__main__":
         Magnetometer = Magnetometer()
-        print(f"Heading angle = {Magnetometer.getData()} degrees")
+        print(f"Heading angle = {Magnetometer._getData()} degrees")

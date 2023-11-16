@@ -36,19 +36,28 @@ RANGE_16G           = 0x03
 MEASURE             = 0x08
 AXES_DATA           = 0x32
 
-# Select the correct i2c bus for this revision of Raspberry Pi
-revision = ([l[12:-1] for l in open('/proc/cpuinfo','r').readlines() if l[:8]=="Revision"]+['0000'])[0]
-
 # ADXL345 class
 class Accelerometer:
 
-    def __init__(self, bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0), device_address = 0x53):        
+    def __init__(self, x0 = 0, y0 = 0, z0 = 0, bus = None, device_address = 0x53):        
+        if bus is None:
+            # Select the correct i2c bus for this revision of Raspberry Pi
+            revision = (
+                [l[12:-1] for l in open('/proc/cpuinfo','r').readlines() \
+                if l[:8]=="Revision"]+['0000']
+            )[0]
+            bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0)
+        
         self.bus = bus
 
         self.device_address = device_address
         self._setBandwidthRate(BW_RATE_100HZ)
         self._setRange(RANGE_2G)
         self._enableMeasurement()
+
+        self.x0 = x0
+        self.y0 = y0
+        self.z0 = z0
 
     def _enableMeasurement(self):
         self.bus.write_byte_data(self.device_address, POWER_CTL, MEASURE)
@@ -70,7 +79,7 @@ class Accelerometer:
     #   Gforce parameter:
     #       False (default): result is returned in m/s^2
     #       True           : result is returned in gs
-    def getData(self, gforce = False):
+    def _getData(self, gforce = False):
         bytes = self.bus.read_i2c_block_data(self.device_address, AXES_DATA, 6)
         
         x = bytes[0] | (bytes[1] << 8)
@@ -94,13 +103,25 @@ class Accelerometer:
             y = y * EARTH_GRAVITY_MS2
             z = z * EARTH_GRAVITY_MS2
 
-        return {"x": x, "y": y, "z": z}
+        return {"x": x - self.x0, "y": y - self.y0, "z": z - self.z0}
+
+    @property
+    def x(self):
+        return self._getData()['x']
+
+    @property
+    def y(self):
+        return self._getData()['y']
+
+    @property
+    def z(self):
+        return self._getData()['z']
 
 if __name__ == "__main__":
     # if run directly we'll just create an instance of the class and output 
     # the current readings
     Accelerometer = Accelerometer()
-    axes = Accelerometer.getData(gforce = False)
+    axes = Accelerometer._getData(gforce = False)
     print( "ADXL345 on address 0x%x:" % (Accelerometer.device_address))
     print( "x = %.5f" % ( axes['x'] ))
     print( "y = %.5f" % ( axes['y'] ))
