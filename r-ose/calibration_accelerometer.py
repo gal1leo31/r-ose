@@ -34,11 +34,11 @@ def computeStats(nb_executions = 100000):
     temperature_mean = 0
     
     for i in range(nb_executions):
-        axes = Accelerometer.getData(gforce = False)
-        current_temperature = Altimeter.getData()['temperature']
-        aggregate_x = _update(aggregate_x, axes['x'])
-        aggregate_y = _update(aggregate_y, axes['y'])
-        aggregate_z = _update(aggregate_z, axes['z'])
+        current_temperature = Altimeter.temperature
+
+        aggregate_x = _update(aggregate_x, Accelerometer.x)
+        aggregate_y = _update(aggregate_y, Accelerometer.y)
+        aggregate_z = _update(aggregate_z, Accelerometer.z)
         temperature_mean += (current_temperature - temperature_mean) / (i+1)
         
     mean_x, variance_x = _finalise(aggregate_x)
@@ -47,16 +47,23 @@ def computeStats(nb_executions = 100000):
 
     return (temperature_mean, mean_x, np.sqrt(variance_x), mean_y, np.sqrt(variance_y), mean_z, np.sqrt(variance_z))
 
-def output(nb_executions):
-    print(f'Starting calibration ... \nDO NOT TOUCH SENSORS \nPlease wait for confirmation, before moving any sensor.')
+def output(nb_executions = 100000, file_name = "calibration_accelerometer.csv"):
+    print(f'Starting calibration sequence for the current angle ...\nDO NOT TOUCH SENSORS. Please wait for confirmation, before moving any sensor.')
     data = computeStats(nb_executions)
     
-    with open("calibration_accelerometer1.csv","a") as f:
+    with open(file_name,"a") as f:
         f.write(f'{time.strftime("%Y,%m,%d,%H,%M,%S")},{nb_executions}')
         for values in data:
             f.write(f",{str(values)}")
 
-    print(f'Calibration complete at {time.strftime("%H:%M:%S on %Y-%m-%d")}')
+        f.write(f"\n")
+
+    print(f'Calibration complete at {time.strftime("%H:%M:%S on %Y-%m-%d")}\n')
     
 if __name__=="__main__":
-    output(nb_executions = 100000)
+    print("Before starting the calibration sequence, make sure the Pi module is stable and not moving.")
+    # Press enter to continue : starting calibration sequence, done =exit, etc.
+    x = 0
+    while x<5:
+        output(nb_executions = 10, file_name = "calib.csv")
+        x+=1
