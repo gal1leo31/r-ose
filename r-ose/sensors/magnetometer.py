@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-'''
+"""
     Find Heading by using HMC5883L interface with Raspberry Pi using Python
 	http://www.electronicwings.com
-'''
+"""
 
 # Packages
 import smbus
@@ -82,4 +82,5 @@ class Magnetometer:
 
 if __name__=="__main__":
         Magnetometer = Magnetometer()
-        print(f"Heading angle = {Magnetometer._getData()} degrees")
+        
+        print(f"Heading angle = {Magnetometer.heading} degrees")

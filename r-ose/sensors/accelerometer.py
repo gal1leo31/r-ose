@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-# ADXL345 Python library for Raspberry Pi 
-#
-# author:  Jonathan Williamson
-# license: BSD, see LICENSE.txt included in this package
-# 
-# This is a Raspberry Pi Python implementation to help you get started with
-# the Adafruit Triple Axis ADXL345 breakout board:
-# http://shop.pimoroni.com/products/adafruit-triple-axis-accelerometer
+"""
+    ADXL345 Python library for Raspberry Pi 
+
+    author:  Jonathan Williamson
+    license: BSD, see LICENSE.txt included in this package
+ 
+    This is a Raspberry Pi Python implementation to help you get started with
+    the Adafruit Triple Axis ADXL345 breakout board:
+    http://shop.pimoroni.com/products/adafruit-triple-axis-accelerometer
+"""
 
 # Packages
 import smbus
@@ -39,7 +41,7 @@ AXES_DATA           = 0x32
 # ADXL345 class
 class Accelerometer:
 
-    def __init__(self, x0 = 0, y0 = 0, z0 = 0, bus = None, device_address = 0x53):        
+    def __init__(self, bus = None, device_address = 0x53):        
         if bus is None:
             # Select the correct i2c bus for this revision of Raspberry Pi
             revision = (
@@ -55,6 +57,12 @@ class Accelerometer:
         self._setRange(RANGE_2G)
         self._enableMeasurement()
 
+        self.x0 = 0
+        self.y0 = 0
+        self.z0 = 0
+
+    def resetOffsets(self, x0 = 0, y0 = 0, z0 = 0):
+        """Allows the user to reset the offset present on each axis with ease."""
         self.x0 = x0
         self.y0 = y0
         self.z0 = z0
@@ -65,8 +73,8 @@ class Accelerometer:
     def _setBandwidthRate(self, rate_flag):
         self.bus.write_byte_data(self.device_address, BW_RATE, rate_flag)
 
-    # Set the measurement range for 10-bit readings
     def _setRange(self, range_flag):
+        """Set the measurement range for 10-bit readings."""
         value = self.bus.read_byte_data(self.device_address, DATA_FORMAT)
 
         value &= ~0x0F;
@@ -75,11 +83,13 @@ class Accelerometer:
 
         self.bus.write_byte_data(self.device_address, DATA_FORMAT, value)
     
-    # Returns the current reading from the sensor for each axis
-    #   Gforce parameter:
-    #       False (default): result is returned in m/s^2
-    #       True           : result is returned in gs
     def _getData(self, gforce = False):
+        """
+        Returns the current reading from the sensor for each axis.
+        Gforce parameter:
+           False (default): result is returned in m/s^2
+           True           : result is returned in gs
+        """
         bytes = self.bus.read_i2c_block_data(self.device_address, AXES_DATA, 6)
         
         x = bytes[0] | (bytes[1] << 8)
@@ -121,10 +131,12 @@ if __name__ == "__main__":
     # if run directly we'll just create an instance of the class and output 
     # the current readings
     Accelerometer = Accelerometer()
-    axes = Accelerometer._getData(gforce = False)
-    print( "ADXL345 on address 0x%x:" % (Accelerometer.device_address))
-    print( "x = %.5f" % ( axes['x'] ))
-    print( "y = %.5f" % ( axes['y'] ))
-    print( "z = %.5f" % ( axes['z'] ))
-    print( (axes['x']**2 + axes['y']**2 + axes['z']**2)**(0.5))
-
+    
+    x,y,z = Accelerometer.x,Accelerometer.y,Accelerometer.z
+    print(
+        f"ADXL345 on address 0x{Accelerometer.device_address}:\n"+
+        "x = %.5f" % (x),
+        "y = %.5f" % (y),
+        "z = %.5f" % (z),
+        "norm of the acceleration vector = %.5f" % (x**2 + y**2 + z**2)**(0.5)
+        )

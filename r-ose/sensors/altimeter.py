@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-# Distributed with a free-will license.
-# Use it any way you want, profit or free, provided it fits in the licenses of its associated works.
-# MPL3115A2
-# This code is designed to work with the MPL3115A2_I2CS I2C Mini Module available from ControlEverything.com.
-# https://www.controleverything.com/products
+"""
+    Distributed with a free-will license.
+    Use it any way you want, profit or free, provided it fits in the licenses of its associated works.
+    MPL3115A2
+    This code is designed to work with the MPL3115A2_I2CS I2C Mini Module available from ControlEverything.com.
+    https://www.controleverything.com/products
+"""
 
 # Packages
 import smbus
@@ -90,8 +92,9 @@ class Altimeter:
 
 if __name__=="__main__":
     Altimeter = Altimeter()
-    data = Altimeter._getData()
-    print("Pressure : %.2f kPa" % data['pressure'])
-    print("Altitude : %.2f m" % data['altitude'])
-    print("Temperature : %.2f K" % data['temperature'])
 
+    print(
+        "Pressure : %.2f kPa" % Altimeter.pressure,
+        "Altitude : %.2f m" % Altimeter.altitude,
+        "Temperature : %.2f K" % Altimeter.temperature
+    )
