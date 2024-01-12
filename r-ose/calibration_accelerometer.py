@@ -4,12 +4,16 @@
 import numpy as np
 import csv
 import time
+import os
 from sensors import accelerometer, altimeter
 
 # Functions
 def computeStats(nb_executions = 100000):
-    # Taken from
-    # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    """
+    Taken from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance.
+    Iterative computing of the mean values coming from the three sensors (altimeter, accelerometer and magnetometer).
+    The variance is also calculated for the accelerometer's data (x, y and z).
+    """
     def _update(existing_aggregate, new_value):
         (count, mean, M2) = existing_aggregate
         count += 1
@@ -48,22 +52,48 @@ def computeStats(nb_executions = 100000):
     return (temperature_mean, mean_x, np.sqrt(variance_x), mean_y, np.sqrt(variance_y), mean_z, np.sqrt(variance_z))
 
 def output(nb_executions = 100000, file_name = "calibration_accelerometer.csv"):
-    print(f'Starting calibration sequence for the current angle ...\nDO NOT TOUCH SENSORS. Please wait for confirmation, before moving any sensor.')
+    """Provides a data output for calibration sequences directly to a csv file."""
+    print('Starting calibration sequence for the current angle ...\nDO NOT TOUCH SENSORS. Please wait for confirmation before moving any sensor.')
     data = computeStats(nb_executions)
     
-    with open(file_name,"a") as f:
-        f.write(f'{time.strftime("%Y,%m,%d,%H,%M,%S")},{nb_executions}')
-        for values in data:
-            f.write(f",{str(values)}")
-
-        f.write(f"\n")
-
-    print(f'Calibration complete at {time.strftime("%H:%M:%S on %Y-%m-%d")}\n')
+    if os.path.isfile(f"../calibration_data/{file_name}") is False:
+        with open(f"../calibration_data/{file_name}","a") as f:
+            writer = csv.writer(f)
+            writer.writerow(["YYYY","MM","DD","hh","mm","ss","nb_executions","temperature_mean","mean_x","gap_x","mean_y","gap_y","mean_z","gap_z"])
     
+    with open(f"../calibration_data/{file_name}","a") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [time.strftime("%Y"),time.strftime("%m"),time.strftime("%d"),time.strftime("%H"),time.strftime("%M"),time.strftime("%S"),
+            nb_executions,data[0],data[1],data[2],data[3],data[4],data[5],data[6]]
+            )
+
+    print(f'Calibration complete at {time.strftime("%H:%M:%S on %Y-%m-%d")}.\n')
+    
+def terminate():
+    """Takes keyboard input to allow the user to quit(Ctrl+C) or continue(enter). The keyboard python library requires root privileges to be used on linux distributions."""
+    try :
+        while True:
+            if input() == "":
+                break
+    except KeyboardInterrupt:
+        print()
+        raise SystemExit
+
 if __name__=="__main__":
-    print("Before starting the calibration sequence, make sure the Pi module is stable and not moving.")
-    # Press enter to continue : starting calibration sequence, done =exit, etc.
-    x = 0
-    while x<5:
-        output(nb_executions = 10, file_name = "calib.csv")
-        x+=1
+    Altimeter = altimeter.Altimeter()
+    print(
+        "Before starting the calibration sequence for accelerometer sensor (ADXL345), make sure the module is stable and not moving.\n"+
+        f"Press enter to continue or Ctrl+C to exit this program :"
+        )
+    
+    terminate()
+
+    start = time.strftime("%Y-%m-%d")
+    environment_temperature = Altimeter.temperature
+    print("Starting calibration session for accelerometer sensor (ADXL345) with an environment temperature of %.2f K." % environment_temperature)
+
+    while True:
+        print("Press enter to start a new sequence or Ctrl+C to terminate this session :")
+        terminate()
+        output(nb_executions = 2000, file_name = start+"-"+"%.2fK.csv" % environment_temperature)

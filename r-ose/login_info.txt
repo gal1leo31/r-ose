@@ -1,0 +1,5 @@
+username : sand
+passwd : lumin007
+
+ssh login : ssh -p 2023 sand@192.168.1.100
+
