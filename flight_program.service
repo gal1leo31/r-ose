@@ -1,0 +1,13 @@
+[Unit]
+Description=R-OSE in-flight data collection service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=sand
+ExecStart=/usr/bin/python3 /usr/local/bin/rose/main.py
+
+[Install]
+WantedBy=multi-user.target
