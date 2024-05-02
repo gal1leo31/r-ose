@@ -131,12 +131,13 @@ if __name__ == "__main__":
     # if run directly we'll just create an instance of the class and output 
     # the current readings
     Accelerometer = Accelerometer()
+    Accelerometer.resetOffsets()
     
     x,y,z = Accelerometer.x,Accelerometer.y,Accelerometer.z
     print(
         f"ADXL345 on address 0x{Accelerometer.device_address}:\n"+
-        "x = %.5f" % (x),
-        "y = %.5f" % (y),
-        "z = %.5f" % (z),
-        "norm of the acceleration vector = %.5f" % (x**2 + y**2 + z**2)**(0.5)
+        "x = %.4f" % x,
+        "y = %.4f" % y,
+        "z = %.4f" % z,
+        "norm of the acceleration vector = %.4f" % (x**2 + y**2 + z**2)**(0.5)
         )

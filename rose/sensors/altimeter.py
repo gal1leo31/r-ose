@@ -18,6 +18,7 @@ register_data = 0x13
 
 # MPL3115A2 class
 class Altimeter:
+    
     def __init__(self, bus = None, device_address = 0x60):
         if bus is None:
             # Select the correct i2c bus for this revision of Raspberry Pi
@@ -76,7 +77,7 @@ class Altimeter:
         temperature_data = self._temperature()
         altitude_barometer_data = self._altitudeBarometer()
         
-        return{'altitude' : altitude_barometer_data['altitude'], 'temperature' : temperature_data['temperature'], 'pressure' : altitude_barometer_data['pressure']}
+        return {'altitude' : altitude_barometer_data['altitude'], 'temperature' : temperature_data['temperature'], 'pressure' : altitude_barometer_data['pressure']}
 
     @property
     def altitude(self):
@@ -94,7 +95,7 @@ if __name__=="__main__":
     Altimeter = Altimeter()
 
     print(
-        "Pressure : %.2f kPa" % Altimeter.pressure,
-        "Altitude : %.2f m" % Altimeter.altitude,
-        "Temperature : %.2f K" % Altimeter.temperature
+        "Pressure : %.4f kPa" % Altimeter.pressure,
+        "Altitude : %.4f m" % Altimeter.altitude,
+        "Temperature : %.4f K" % Altimeter.temperature
     )
