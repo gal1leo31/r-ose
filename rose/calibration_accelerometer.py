@@ -7,6 +7,9 @@ import time
 import os
 from sensors import accelerometer, altimeter
 
+# Define PATH
+PATH = "/var/data/calibration_data/"
+
 # Functions
 def computeStats(nb_executions = 100000):
     """
@@ -49,19 +52,24 @@ def computeStats(nb_executions = 100000):
     mean_y, variance_y = _finalise(aggregate_y)
     mean_z, variance_z = _finalise(aggregate_z)
 
-    return (temperature_mean, mean_x, np.sqrt(variance_x), mean_y, np.sqrt(variance_y), mean_z, np.sqrt(variance_z))
+    return (
+        float("{:.2f}".format(temperature_mean)),
+        mean_x, np.sqrt(variance_x),
+        mean_y, np.sqrt(variance_y),
+        mean_z, np.sqrt(variance_z)
+        )
 
 def output(nb_executions = 100000, file_name = "calibration_accelerometer.csv"):
     """Provides a data output for calibration sequences directly to a csv file."""
-    print('Starting calibration sequence for the current angle ...\nDO NOT TOUCH SENSORS. Please wait for confirmation before moving any sensor.')
+    print(f'Starting calibration sequence for the current angle at {time.strftime("%H:%M:%S on %Y-%m-%d")} ...\nDO NOT TOUCH SENSORS. Please wait for confirmation before moving any sensor.')
     data = computeStats(nb_executions)
     
-    if os.path.isfile(f"../calibration_data/{file_name}") is False:
-        with open(f"../calibration_data/{file_name}","a") as f:
+    if os.path.isfile(f"{PATH + file_name}") is False:
+        with open(f"{PATH + file_name}","a") as f:
             writer = csv.writer(f)
             writer.writerow(["YYYY","MM","DD","hh","mm","ss","nb_executions","temperature_mean","mean_x","gap_x","mean_y","gap_y","mean_z","gap_z"])
     
-    with open(f"../calibration_data/{file_name}","a") as f:
+    with open(f"{PATH + file_name}","a") as f:
         writer = csv.writer(f)
         writer.writerow(
             [time.strftime("%Y"),time.strftime("%m"),time.strftime("%d"),time.strftime("%H"),time.strftime("%M"),time.strftime("%S"),
@@ -93,7 +101,10 @@ if __name__=="__main__":
     environment_temperature = Altimeter.temperature
     print("Starting calibration session for accelerometer sensor (ADXL345) with an environment temperature of %.2f K." % environment_temperature)
 
+    x = 1
     while True:
-        print("Press enter to start a new sequence or Ctrl+C to terminate this session :")
+        print(f"Press enter to start a new sequence ({x}) or Ctrl+C to terminate this session :")
         terminate()
         output(nb_executions = 2000, file_name = start+"-"+"%.2fK.csv" % environment_temperature)
+        
+        x += 1
