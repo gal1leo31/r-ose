@@ -1,0 +1,13 @@
+[Unit]
+Description=Reusable Open Stratospheric Explorer (R-OSE) in-flight data logging service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/python3 /usr/local/bin/r-ose/flight_dlp/main.py
+
+[Install]
+WantedBy=multi-user.target
