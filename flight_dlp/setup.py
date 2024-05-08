@@ -15,8 +15,8 @@ setup(
         name = "R-OSE",
         version = info["__version__"],
         author = "William L. Fauteux",
-        description = "Reusable Open Stratospheric Explorer",
-        long_description = "Flight program on bord the plateform, which is used to gather information regarding flight conditions.",
+        description = "Reusable Open Stratospheric Explorer (R-OSE) - Flight data logging program",
+        long_description = "This program is used aboard the platform to gather information regarding flight conditions.",
         packages = find_packages(),
         install_requires = [
             "smbus",
